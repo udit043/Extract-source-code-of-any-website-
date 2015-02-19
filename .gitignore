@@ -1,28 +1,63 @@
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+#include <windows.h>
+#include <wininet.h>
+#include <iostream>
+#include <fstream.h>
+fstream fs_obj;
+using namespace std;
+      
+int main(int argc, char *argv[]) 
+{
+   char a[80];char str[1000] = "http://www.facebook.com/";
+   int z;
+   system("title Udit Raikwar Program by using C++");    
+   cout<<"enter Second String :\n";
+   gets(a);
+   std::strcat(str, a);       
+    
+       HINTERNET connect = InternetOpen("MyBrowser",INTERNET_OPEN_TYPE_PRECONFIG,NULL, NULL, 0);
 
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
+       if(!connect)
+       {
+         cout<<"Connection Failed or Syntax error";
+         fs_obj.open("source.txt",ios::out |ios::app);           
+         fs_obj<<"\n !connect \n";
+         fs_obj.close();
+         system("pause");
+       }
+ 
+       HINTERNET OpenAddress = InternetOpenUrl(connect,str, NULL, 0, INTERNET_FLAG_PRAGMA_NOCACHE|INTERNET_FLAG_KEEP_CONNECTION, 0);
+ 
+       if ( !OpenAddress )
+       {
+         DWORD ErrorNum = GetLastError();
+         
+         cout<<"\nFailed to open URL \nError No: "<<ErrorNum<<"\n";      
+         fs_obj.open("source.txt",ios::out  | ios::app);            
+         fs_obj<<"\n !open address  [not connected].. \n";
+         fs_obj.close();
+             
+         InternetCloseHandle(connect);
+         system("pause");
+       }
+ 
+       char DataReceived[9999];
+       DWORD NumberOfBytesRead = 0;
+       while(InternetReadFile(OpenAddress, DataReceived, 9999, &NumberOfBytesRead) && NumberOfBytesRead )
+        {
+          fs_obj.open("source.txt",ios::out  | ios::app);
+          fs_obj<<DataReceived;
+          fs_obj<<"\n ------------------------------------ *********** ------------------------------------\n";
+          fs_obj.close();
+        }
+     
+       for(z=0;z<9999;++z)
+        { 
+          DataReceived[z]=NULL; 
+        }
+       
+   InternetCloseHandle(OpenAddress);
+   InternetCloseHandle(connect);
+   Sleep(1000);      
+   system("pause");
+   return EXIT_SUCCESS;    
+}
